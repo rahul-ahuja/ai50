@@ -149,28 +149,41 @@ def utility(board):
     else:
         return 0
 
-def max_value(board):
+def max_value(board, alpha, beta):
     v = -float('inf')
     if terminal(board): # base case
         return utility(board), None, None
     
     for action in actions(board):
-        max_state = min_value(result(board, action))[0]
-        if v < max_state:
-            v = max_state
+        max_node_val = min_value(result(board, action), alpha, beta)[0]
+        if v < max_node_val:
+            v = max_node_val
             i, j = action
+            
+            # beta cut-off
+            alpha = max(alpha, v)
+            if beta <= alpha:
+                break
+            
     return v, i, j
 
-def min_value(board):
+def min_value(board, alpha, beta):
     v = float('inf')
     if terminal(board): # base case
         return utility(board), None, None
     
     for action in actions(board):
-        min_state = max_value(result(board, action))[0]
-        if v > min_state:
-            v = min_state
+        min_node_val = max_value(result(board, action), alpha, beta)[0]
+        if v > min_node_val:
+            v = min_node_val
             i, j = action
+            
+            # alpha cut-off
+            beta = min(beta, v)
+            if beta <= alpha:
+                break
+            
+            
     return v, i, j
 
 
@@ -184,8 +197,8 @@ def minimax(board):
         return None
     
     if player(board) == X:
-        v, i, j = max_value(board)
+        v, i, j = max_value(board, alpha=-float('inf'), beta=float('inf'))
         return i, j 
     else:
-        v, i, j = min_value(board) 
+        v, i, j = min_value(board, alpha=-float('inf'), beta=float('inf')) 
         return i, j
